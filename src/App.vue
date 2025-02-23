@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { BMPLogicSimulator } from './bmplogic'
 
 // refs to elements
 const fileInput = ref({} as HTMLInputElement)
@@ -8,6 +9,9 @@ const canvas = ref({} as HTMLCanvasElement)
 // settings
 const scale = ref(8)
 const baseImage = ref<HTMLImageElement>()
+
+// LOGIC!
+let simulator: BMPLogicSimulator | undefined = undefined
 
 // event handlers
 
@@ -30,25 +34,24 @@ onMounted(() => {
   }
 })
 
+onUnmounted(() => {})
+
 // canvas functions
 function initCanvas() {
   const img = baseImage.value
   if (!img) return
 
-  // this must come before the getContext call, otherwise the image will be blurry
-  canvas.value.width = img.naturalWidth * scale.value
-  canvas.value.height = img.naturalHeight * scale.value
-
-  const ctx = canvas.value.getContext('2d')
-  if (!ctx) return
-
-  ctx.imageSmoothingEnabled = false
-  ctx.drawImage(img, 0, 0, img.width * scale.value, img.height * scale.value)
+  simulator = new BMPLogicSimulator(img, canvas.value)
+  // @ts-expect-error window has no "bmpSimulator" property, this is for debug only
+  window.bmpSimulator = simulator
+  console.log(simulator)
 }
 
 // watchers
 
-watch([baseImage, scale], initCanvas)
+watch(baseImage, initCanvas)
+// TODO: change canvas style for scaling
+// watch(scale, (value) => simulator && (simulator.scale = value))
 </script>
 
 <template>

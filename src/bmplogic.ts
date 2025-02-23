@@ -43,13 +43,30 @@ function isBright(pixel: Uint8ClampedArray): boolean {
   return pixel[0] > 200 || pixel[1] > 200 || pixel[2] > 200
 }
 
+/**
+ * Reduce the brightness of a pixel in place.
+ * @param pixel The pixel to reduce.
+ * @returns The argument.
+ */
+function reduceBrightness(pixel: Uint8ClampedArray): Uint8ClampedArray {
+  pixel[0] *= 0.5
+  pixel[1] *= 0.5
+  pixel[2] *= 0.5
+  return pixel
+}
+
 export class BMPLogicSimulator {
   /** The image data obtained from the baseImage. */
   private baseImageData: ImageData
 
+  /** The edited image data that is updated every tick. */
+  private dirtyImageData: ImageData
+
   /** The features found by `this.findFeatures()`. */
   private wires: Wire[] = []
   private notGates: NotGate[] = []
+
+  private offWires = new Set<number>()
 
   constructor(public baseImage: HTMLImageElement, public canvas: HTMLCanvasElement) {
     // get ImageData from baseImage
@@ -59,7 +76,11 @@ export class BMPLogicSimulator {
     ctx.drawImage(baseImage, 0, 0)
     this.baseImageData = ctx.getImageData(0, 0, baseImage.naturalWidth, baseImage.naturalHeight)
 
+    // copy the image data for drawCanvas to use
+    this.dirtyImageData = new ImageData(new Uint8ClampedArray(this.baseImageData.data), this.baseImageData.width)
+
     this.findFeatures()
+    this.drawCanvas()
   }
 
   get naturalWidth(): number {
@@ -68,6 +89,32 @@ export class BMPLogicSimulator {
 
   get naturalHeight(): number {
     return this.baseImage.naturalHeight
+  }
+
+  onTick() {
+    // TODO: implement onTick logic
+  }
+
+  /**
+   * Draws the image on the canvas, taking into account deasserted wires (reduce
+   * brightness).
+   */
+  private drawCanvas() {
+    // FIXME: Actually do the deasserted wires thingy :p
+    const ctx = this.canvas.getContext('2d')!
+    ctx.imageSmoothingEnabled = false
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    const data = this.dirtyImageData.data
+    for (const wire of this.wires) {
+      if (this.offWires.has(wire.id)) {
+        for (const point of wire.points) {
+          const index = (point.y * this.naturalWidth + point.x) * 4
+          const pixel = data.slice(index, index + 4)
+          data.set(reduceBrightness(pixel), index)
+        }
+      }
+    }
+    ctx.putImageData(this.dirtyImageData, 0, 0)
   }
 
   /**
