@@ -55,6 +55,8 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
+  /* I SPENT LIKE 2483975498054 HOURS FINDING THIS URGHHHHHHHHH */
+  image-rendering: pixelated;
 }
 
 body {
