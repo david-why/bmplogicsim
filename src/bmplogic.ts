@@ -56,6 +56,8 @@ function reduceBrightness(pixel: Uint8ClampedArray): Uint8ClampedArray {
 }
 
 export class BMPLogicSimulator {
+  private context: CanvasRenderingContext2D
+
   /** The image data obtained from the baseImage. */
   private baseImageData: ImageData
 
@@ -67,12 +69,15 @@ export class BMPLogicSimulator {
   private notGates: NotGate[] = []
 
   private offWires = new Set<number>()
+  private forceOnWires = new Set<number>()
 
   constructor(public baseImage: HTMLImageElement, public canvas: HTMLCanvasElement) {
-    // get ImageData from baseImage
     canvas.width = baseImage.naturalWidth
     canvas.height = baseImage.naturalHeight
-    const ctx = canvas.getContext('2d')!
+
+    // get ImageData from baseImage
+    const ctx = this.context = canvas.getContext('2d')!
+    ctx.imageSmoothingEnabled = false
     ctx.drawImage(baseImage, 0, 0)
     this.baseImageData = ctx.getImageData(0, 0, baseImage.naturalWidth, baseImage.naturalHeight)
 
@@ -91,9 +96,12 @@ export class BMPLogicSimulator {
     return this.baseImage.naturalHeight
   }
 
+  /**
+   * Every tick, find NOT gates whose inputs are off, and make the corresponding
+   * outputs on. Also, any forced on wires stay on.
+   */
   onTick() {
-    // find NOT gates whose inputs are off, and make the outputs on
-    const newOnWires = new Set<number>()
+    const newOnWires = new Set<number>(this.forceOnWires)
     for (const notGate of this.notGates) {
       if (this.offWires.has(notGate.inputWire)) {
         newOnWires.add(notGate.outputWire)
@@ -101,8 +109,32 @@ export class BMPLogicSimulator {
     }
     this.offWires.clear()
     this.offWires = new Set(this.wires.map((wire) => wire.id).filter((id) => !newOnWires.has(id)))
-    console.log(this.offWires)
     this.drawCanvas()
+  }
+
+  hold(x: number, y: number) {
+    const id = this.findWire(x, y)?.id
+    if (id) {
+      this.forceOnWires.add(id)
+    }
+  }
+
+  unhold(x: number, y: number) {
+    const id = this.findWire(x, y)?.id
+    if (id) {
+      this.forceOnWires.delete(id)
+    }
+  }
+
+  toggleHold(x: number, y: number) {
+    const id = this.findWire(x, y)?.id
+    if (id) {
+      if (this.forceOnWires.has(id)) {
+        this.forceOnWires.delete(id)
+      } else {
+        this.forceOnWires.add(id)
+      }
+    }
   }
 
   /**
@@ -110,10 +142,8 @@ export class BMPLogicSimulator {
    * brightness).
    */
   private drawCanvas() {
-    // FIXME: Actually do the deasserted wires thingy :p
-    const ctx = this.canvas.getContext('2d')!
-    ctx.imageSmoothingEnabled = false
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    const ctx = this.context
+    // ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     const baseData = this.baseImageData.data
     const data = this.dirtyImageData.data
     for (const wire of this.wires) {
@@ -169,7 +199,7 @@ export class BMPLogicSimulator {
    * Find all the wires, NOT gates, and intersections in the image.
    */
   private findFeatures() {
-    let id = 0
+    let id = 1
 
     // notice how sideDirections[0] is between cornerDirections[0] and [1]
     const cornerDirections = [[-1, -1], [1, -1], [1, 1], [-1, 1]] as const
