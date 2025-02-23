@@ -92,7 +92,17 @@ export class BMPLogicSimulator {
   }
 
   onTick() {
-    // TODO: implement onTick logic
+    // find NOT gates whose inputs are off, and make the outputs on
+    const newOnWires = new Set<number>()
+    for (const notGate of this.notGates) {
+      if (this.offWires.has(notGate.inputWire)) {
+        newOnWires.add(notGate.outputWire)
+      }
+    }
+    this.offWires.clear()
+    this.offWires = new Set(this.wires.map((wire) => wire.id).filter((id) => !newOnWires.has(id)))
+    console.log(this.offWires)
+    this.drawCanvas()
   }
 
   /**
@@ -104,14 +114,14 @@ export class BMPLogicSimulator {
     const ctx = this.canvas.getContext('2d')!
     ctx.imageSmoothingEnabled = false
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    const baseData = this.baseImageData.data
     const data = this.dirtyImageData.data
     for (const wire of this.wires) {
-      if (this.offWires.has(wire.id)) {
-        for (const point of wire.points) {
-          const index = (point.y * this.naturalWidth + point.x) * 4
-          const pixel = data.slice(index, index + 4)
-          data.set(reduceBrightness(pixel), index)
-        }
+      const isOff = this.offWires.has(wire.id)
+      for (const point of wire.points) {
+        const index = (point.y * this.naturalWidth + point.x) * 4
+        const pixel = baseData.slice(index, index + 4)
+        data.set(isOff ? reduceBrightness(pixel) : pixel, index)
       }
     }
     ctx.putImageData(this.dirtyImageData, 0, 0)

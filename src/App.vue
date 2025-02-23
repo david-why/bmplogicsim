@@ -12,6 +12,7 @@ const baseImage = ref<HTMLImageElement>()
 
 // LOGIC!
 let simulator: BMPLogicSimulator | undefined = undefined
+let timerId: number | null = null
 
 // event handlers
 
@@ -37,6 +38,7 @@ onMounted(() => {
 onUnmounted(() => {})
 
 // canvas functions
+
 function initCanvas() {
   const img = baseImage.value
   if (!img) return
@@ -45,6 +47,10 @@ function initCanvas() {
   // @ts-expect-error window has no "bmpSimulator" property, this is for debug only
   window.bmpSimulator = simulator
   console.log(simulator)
+  if (timerId) clearInterval(timerId)
+  timerId = setInterval(() => {
+    simulator?.onTick()
+  }, 1000 / 2)
 }
 
 // watchers
