@@ -229,7 +229,9 @@ export class BMPLogicSimulator {
             // 2. a NOT gate (two adjacent corners bright)
             const notGateInputSide = cornerDirections.findIndex(([dx, dy], index) => {
               const [dx2, dy2] = cornerDirections[(index + 1) % 4]
-              return this.isPixelBright(x + dx, y + dy) && this.isPixelBright(x + dx2, y + dy2)
+              const [dx3, dy3] = cornerDirections[(index + 2) % 4]
+              const [dx4, dy4] = cornerDirections[(index + 3) % 4]
+              return this.isPixelBright(x + dx, y + dy) && this.isPixelBright(x + dx2, y + dy2) && !this.isPixelBright(x + dx3, y + dy3) && !this.isPixelBright(x + dx4, y + dy4)
             })
             if (notGateInputSide >= 0) {
               const [dx, dy] = sideDirections[notGateInputSide]
