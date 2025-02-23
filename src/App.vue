@@ -6,7 +6,7 @@ import LogicSimulator from './components/LogicSimulator.vue'
 const fileInput = ref({} as HTMLInputElement)
 
 // settings
-const scale = ref(4)
+const scale = ref(2)
 const src = ref<string>()
 
 /**

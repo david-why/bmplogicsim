@@ -117,6 +117,6 @@ watch(() => props.scale, scaleCanvas, { deep: true })
 
 <style scoped>
 .button {
-  margin: 4px;
+  margin: 8px 0;
 }
 </style>
