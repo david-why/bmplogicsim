@@ -13,7 +13,6 @@ declare interface Point {
 declare interface Wire {
   id: number
   points: Point[]
-  isForcedOn: boolean
 }
 
 /**
@@ -161,9 +160,12 @@ export class BMPLogicSimulator {
     }
 
     // now, BFS for all the wires
+    const visited: boolean[][] = Array.from({ length: this.baseImageData.height }, () =>
+      Array(this.baseImageData.width).fill(false)
+    )
     for (let y = 0; y < this.baseImageData.height; y++) {
       for (let x = 0; x < this.baseImageData.width; x++) {
-        if (this.isPixelBright(x, y)) {
+        if (this.isPixelBright(x, y) && !visited[y][x]) {
           // found a bright pixel, start a BFS from here
           const queue: Point[] = [{ x, y }]
           const points: Point[] = []
@@ -180,7 +182,8 @@ export class BMPLogicSimulator {
               }
             }
           }
-          this.wires.push({ id, points, isForcedOn: false })
+          this.wires.push({ id, points })
+          points.forEach(({ x, y }) => visited[y][x] = true)
           id++
         }
       }
@@ -193,9 +196,8 @@ export class BMPLogicSimulator {
         const wire2 = this.findWire(intersection.x - dx, intersection.y - dy)!
         // the two wires may be the same one, we don't need to connect that...
         if (wire1.id === wire2.id) continue
-        const newWire = { id, points: [...wire1.points, ...wire2.points], isForcedOn: false }
         this.wires = this.wires.filter((wire) => wire !== wire1 && wire !== wire2)
-        this.wires.push(newWire)
+        this.wires.push({ id, points: [...wire1.points, ...wire2.points] })
         id++
       }
     }
