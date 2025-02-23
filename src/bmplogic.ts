@@ -56,6 +56,7 @@ function reduceBrightness(pixel: Uint8ClampedArray): Uint8ClampedArray {
 }
 
 export class BMPLogicSimulator {
+  /** The drawing context of the canvas to use. */
   private context: CanvasRenderingContext2D
 
   /** The image data obtained from the baseImage. */
@@ -68,7 +69,10 @@ export class BMPLogicSimulator {
   private wires: Wire[] = []
   private notGates: NotGate[] = []
 
+  /** The wires that are currently turned off. */
   private offWires = new Set<number>()
+
+  /** The wires that are held on. */
   private forceOnWires = new Set<number>()
 
   constructor(public baseImage: HTMLImageElement, public canvas: HTMLCanvasElement) {
@@ -112,6 +116,11 @@ export class BMPLogicSimulator {
     this.drawCanvas()
   }
 
+  /**
+   * Hold a wire at a point, making it stay on.
+   * @param x The X coordinate.
+   * @param y The Y coordinate.
+   */
   hold(x: number, y: number) {
     const id = this.findWire(x, y)?.id
     if (id) {
@@ -119,6 +128,11 @@ export class BMPLogicSimulator {
     }
   }
 
+  /**
+   * Releases a wire previously held.
+   * @param x The X coordinate.
+   * @param y The Y coordinate.
+   */
   unhold(x: number, y: number) {
     const id = this.findWire(x, y)?.id
     if (id) {
@@ -126,6 +140,11 @@ export class BMPLogicSimulator {
     }
   }
 
+  /**
+   * Toggle the hold status of a wire.
+   * @param x The X coordinate.
+   * @param y The Y coordinate.
+   */
   toggleHold(x: number, y: number) {
     const id = this.findWire(x, y)?.id
     if (id) {
@@ -231,7 +250,12 @@ export class BMPLogicSimulator {
               const [dx2, dy2] = cornerDirections[(index + 1) % 4]
               const [dx3, dy3] = cornerDirections[(index + 2) % 4]
               const [dx4, dy4] = cornerDirections[(index + 3) % 4]
-              return this.isPixelBright(x + dx, y + dy) && this.isPixelBright(x + dx2, y + dy2) && !this.isPixelBright(x + dx3, y + dy3) && !this.isPixelBright(x + dx4, y + dy4)
+              return (
+                this.isPixelBright(x + dx, y + dy) &&
+                this.isPixelBright(x + dx2, y + dy2) &&
+                !this.isPixelBright(x + dx3, y + dy3) &&
+                !this.isPixelBright(x + dx4, y + dy4)
+              )
             })
             if (notGateInputSide >= 0) {
               const [dx, dy] = sideDirections[notGateInputSide]
@@ -291,7 +315,8 @@ export class BMPLogicSimulator {
       }
     }
 
-    // finally, find the two wires of the temp NOT gates and make it a real one
+    // finally, find the two wires of the temp NOT gates and add the actual NOT
+    // gate to the array
     for (const tempNotGate of tempNotGates) {
       const inputWire = this.findWire(tempNotGate.inputPixel.x, tempNotGate.inputPixel.y)!
       const outputWire = this.findWire(tempNotGate.outputPixel.x, tempNotGate.outputPixel.y)!
