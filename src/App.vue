@@ -182,7 +182,7 @@ ADDR   DATA       'Assembly'
     <input type="file" accept="image/*" @input="onFileSelected" ref="fileInput" />
   </div>
 
-  <LogicSimulator :src="src" :defaultScale="2" v-if="src"></LogicSimulator>
+  <LogicSimulator :src="src" :defaultScale="2" v-if="src" :key="src"></LogicSimulator>
 </template>
 
 <style scoped></style>
