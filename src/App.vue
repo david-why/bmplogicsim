@@ -158,8 +158,12 @@ watch(src, (value, oldValue) => {
       After you program the computer, click on the big green "RUN" button to start running your
       program!
     </li>
+    <li>
+      Whatever number your program stores in memory 31 (0b11111) will be displayed on the
+      eight-segment display to the right of the computer.
+    </li>
   </ol>
-  <p>If you're confused, try this program:</p>
+  <p>If you'd like an example program, try this:</p>
   <pre>
 ADDR   DATA       'Assembly'
 00000: 01111111   STA 31
@@ -182,6 +186,24 @@ ADDR   DATA       'Assembly'
   </div>
 
   <LogicSimulator :src="src" :defaultScale="2" v-if="src" :key="src"></LogicSimulator>
+
+  <h2>In the future...</h2>
+  <p>
+    There are still many things to improve with this project! Here are some ideas that I have in
+    mind for the future:
+  </p>
+  <ul>
+    <li>Editing images directly on the website</li>
+    <li>Easy embedding into other websites</li>
+    <li>Cooler demos</li>
+    <li>Self-executing demos (automated setup and running)</li>
+    <li>Touchscreen support</li>
+    <li>... and many more!</li>
+  </ul>
+  <p>
+    After the Hackathon ends, I might add these features to the website for completeness. Until
+    then, stay tuned!
+  </p>
 </template>
 
 <style scoped></style>
