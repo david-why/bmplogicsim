@@ -122,8 +122,7 @@ watch(src, (value, oldValue) => {
   <p>
     It is also possible to create a functioning computer with these circuit elements, with an
     extremely simple instruction set. Here is one such computer, feel free to play around with it
-    and even make a program or two! (You might need to reduce the scale at the top of the website to
-    use this computer comfortably.)
+    and even make a program or two!
   </p>
   <p>
     <em>
