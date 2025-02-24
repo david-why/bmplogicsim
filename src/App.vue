@@ -32,6 +32,7 @@ watch(src, (value, oldValue) => {
     · Website &amp; most demos created by
     <a href="https://github.com/david-why/bmplogicsim">david-why</a>
   </p>
+  <p><em>This website may not function properly on mobile devices.</em></p>
 
   <h2>Overview</h2>
   <p>
@@ -59,7 +60,7 @@ watch(src, (value, oldValue) => {
     <li>Primary mouse button (usually left) to temporarily toggle on a wire.</li>
     <li>Secondary mouse button (usually right) to toggle on a wire until you press it again.</li>
   </ul>
-  <LogicSimulator src="demo_elements.png" :defaultScale="3"></LogicSimulator>
+  <LogicSimulator src="demo_elements.png" :defaultScale="4"></LogicSimulator>
 
   <p>From these elements, you can create anything!</p>
   <ul>
@@ -93,7 +94,7 @@ watch(src, (value, oldValue) => {
       click on it again!
     </em>
   </p>
-  <LogicSimulator src="demo_adder.png" :defaultScale="3"></LogicSimulator>
+  <LogicSimulator src="demo_adder.png" :defaultScale="4"></LogicSimulator>
 
   <p>
     Hey, if we can make a 1-bit adder, we can certainly make an 8-bit adder! Let's do that right

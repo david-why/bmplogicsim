@@ -69,6 +69,9 @@ export class BMPLogicSimulator {
   private wires: Wire[] = []
   private notGates: NotGate[] = []
 
+  /** Convenience mapping from point to wire id. Key is "x,y". */
+  private pointToWire = new Map<string, Wire>()
+
   /** The wires that are currently turned off. */
   private offWires = new Set<number>()
 
@@ -209,9 +212,7 @@ export class BMPLogicSimulator {
    * @returns The wire that contains the given point.
    */
   private findWire(x: number, y: number): Wire | undefined {
-    return this.wires.find((wire) =>
-      wire.points.some((point) => point.x === x && point.y === y)
-    )
+    return this.pointToWire.get(`${x},${y}`)
   }
 
   /**
@@ -288,6 +289,7 @@ export class BMPLogicSimulator {
               continue
             }
             points.push(current)
+            visited[current.y][current.x] = true
             for (const [dx, dy] of sideDirections) {
               const next = { x: current.x + dx, y: current.y + dy }
               if (this.isPixelBright(next.x, next.y)) {
@@ -295,8 +297,9 @@ export class BMPLogicSimulator {
               }
             }
           }
-          this.wires.push({ id, points })
-          points.forEach(({ x, y }) => visited[y][x] = true)
+          const wire = { id, points }
+          this.wires.push(wire)
+          points.forEach(point => this.pointToWire.set(`${point.x},${point.y}`, wire))
           id++
         }
       }
@@ -309,8 +312,17 @@ export class BMPLogicSimulator {
         const wire2 = this.findWire(intersection.x - dx, intersection.y - dy)!
         // the two wires may be the same one, we don't need to connect that...
         if (wire1.id === wire2.id) continue
-        this.wires = this.wires.filter((wire) => wire !== wire1 && wire !== wire2)
-        this.wires.push({ id, points: [...wire1.points, ...wire2.points] })
+        for (let i = 0; i < this.wires.length; i++) {
+          if (this.wires[i].id === wire1.id || this.wires[i].id === wire2.id) {
+            this.wires.splice(i, 1)
+            i--
+          }
+        }
+        const newWire = { id, points: [...wire1.points, ...wire2.points] }
+        this.wires.push(newWire)
+        for (const point of newWire.points) {
+          this.pointToWire.set(`${point.x},${point.y}`, newWire)
+        }
         id++
       }
     }
