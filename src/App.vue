@@ -6,7 +6,6 @@ import LogicSimulator from './components/LogicSimulator.vue'
 const fileInput = ref({} as HTMLInputElement)
 
 // settings
-const scale = ref(2)
 const src = ref<string>()
 
 /**
@@ -33,11 +32,6 @@ watch(src, (value, oldValue) => {
     · Website &amp; most demos created by
     <a href="https://github.com/david-why/bmplogicsim">david-why</a>
   </p>
-  <div style="display: flex; flex-direction: row; gap: 8px; align-items: center">
-    <label for="scaleInput"><strong>Image Scale</strong></label>
-    <input id="scaleInput" type="range" min="0.1" max="10" step="0.1" v-model="scale" />
-    <span>{{ scale }}x</span>
-  </div>
 
   <h2>Overview</h2>
   <p>
@@ -65,7 +59,7 @@ watch(src, (value, oldValue) => {
     <li>Primary mouse button (usually left) to temporarily toggle on a wire.</li>
     <li>Secondary mouse button (usually right) to toggle on a wire until you press it again.</li>
   </ul>
-  <LogicSimulator src="demo_elements.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_elements.png" :defaultScale="3"></LogicSimulator>
 
   <p>From these elements, you can create anything!</p>
   <ul>
@@ -77,7 +71,7 @@ watch(src, (value, oldValue) => {
     </li>
     <li><strong>XOR gate</strong>: Implemented with ANDs, NOTs, and an OR.</li>
   </ul>
-  <LogicSimulator src="demo_gates.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_gates.png" :defaultScale="3"></LogicSimulator>
 
   <h2>More Complex Circuits</h2>
   <p>
@@ -99,7 +93,7 @@ watch(src, (value, oldValue) => {
       click on it again!
     </em>
   </p>
-  <LogicSimulator src="demo_adder.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_adder.png" :defaultScale="3"></LogicSimulator>
 
   <p>
     Hey, if we can make a 1-bit adder, we can certainly make an 8-bit adder! Let's do that right
@@ -112,15 +106,15 @@ watch(src, (value, oldValue) => {
       then pressing C! The carry will ripple through the entire adder.
     </em>
   </p>
-  <LogicSimulator src="demo_adder2.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_adder2.png" :defaultScale="3"></LogicSimulator>
 
   <p>
-    Who says computers can only use binary? We'll make our extremely simple simulator display a
-    decimal number! Check out the following circuit, which uses a decoder-like structure to display
-    a number from 0 to 9. Click on one of the numbers in the "INPUT" section to try it out!
+    Who says computers can only use binary? We'll make our simulator display a decimal number! Check
+    out the following circuit, which uses a decoder-like structure to display a number from 0 to 9.
+    Click on one of the numbers in the "INPUT" section to try it out!
     <em>(Did you know that any relatively bright color can be used as wires?)</em>
   </p>
-  <LogicSimulator src="demo_digit.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_digit.png" :defaultScale="3"></LogicSimulator>
 
   <h2>A Cool Demo</h2>
 
@@ -140,13 +134,14 @@ watch(src, (value, oldValue) => {
   <p>To use the computer:</p>
   <ol>
     <li>Start the simulation.</li>
-    <li>Click and hold the big red "RESET" button near the bottom for a couple of seconds.</li>
     <li>
-      Click and hold the small orange "CLR" button at the bottom right for a couple of seconds.
+      Click and hold the big red "RESET" button near the bottom for a couple of seconds, then the
+      small orange "CLR" button at the bottom right for a couple of seconds.
     </li>
+    <li>Make sure that nothing is flashing on the screen. Otherwise, repeat the previous step.</li>
     <li>
       To edit the memory and add a program:
-      <ol type="a">
+      <ol type="i">
         <li>Right-click the orange "EN" button to enable editing.</li>
         <li>Use the "ADDR" and "DATA" inputs to select a memory cell and the data to write.</li>
         <li>Click the big orange "SET" button for a short while to write the memory.</li>
@@ -172,7 +167,7 @@ ADDR   DATA       'Assembly'
 00010: 11000000   JNC 0</pre
   >
   <p>After you RUN it, check the display on the right hand side!</p>
-  <LogicSimulator src="demo_computer.png" :scale="scale"></LogicSimulator>
+  <LogicSimulator src="demo_computer.png" :defaultScale="1"></LogicSimulator>
 
   <h2>Your Turn</h2>
   <p>
@@ -186,7 +181,7 @@ ADDR   DATA       'Assembly'
     <input type="file" accept="image/*" @input="onFileSelected" ref="fileInput" />
   </div>
 
-  <LogicSimulator :src="src" :scale="scale" v-if="src"></LogicSimulator>
+  <LogicSimulator :src="src" :defaultScale="2" v-if="src"></LogicSimulator>
 </template>
 
 <style scoped></style>

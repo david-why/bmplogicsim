@@ -5,18 +5,20 @@ import { BMPLogicSimulator } from '@/bmplogic'
 const props = withDefaults(
   defineProps<{
     src: string
-    scale?: number
+    defaultScale?: number
   }>(),
   {
-    scale: 1,
+    defaultScale: 1,
   },
 )
 
 // refs to elements
-const canvas = ref({} as HTMLCanvasElement)
+const canvas = ref<HTMLCanvasElement>()
 
 // settings
+const uuid = ref<string>()
 const baseImage = ref<HTMLImageElement>()
+const scale = ref(props.defaultScale)
 
 // LOGIC!
 const timerId = ref<number | null>(null)
@@ -42,11 +44,11 @@ function stopTimer() {
 
 function onMouseDown(event: MouseEvent) {
   event.preventDefault()
-  if (!simulator) return
+  if (!simulator || !canvas.value) return
   // find actual pixel in canvas
   const rect = canvas.value.getBoundingClientRect()
-  const x = Math.floor((event.clientX - rect.left) / props.scale)
-  const y = Math.floor((event.clientY - rect.top) / props.scale)
+  const x = Math.floor((event.clientX - rect.left) / scale.value)
+  const y = Math.floor((event.clientY - rect.top) / scale.value)
   if (event.button === 0) {
     mousePosition = [x, y]
     simulator.hold(x, y)
@@ -67,6 +69,7 @@ function onMouseUp(event: MouseEvent) {
 }
 
 onMounted(() => {
+  uuid.value = Math.random().toString(36).slice(2)
   const img = new Image()
   img.src = props.src
   img.onload = () => {
@@ -78,35 +81,34 @@ onMounted(() => {
 
 function initCanvas() {
   const img = baseImage.value
-  if (!img) return
-
-  scaleCanvas()
+  if (!img || !canvas.value) return
 
   simulator = new BMPLogicSimulator(img, canvas.value)
 }
 
-function scaleCanvas() {
-  const img = baseImage.value
-  if (!img) return
-  canvas.value.style.width = `${img.width * props.scale}px`
-  canvas.value.style.height = `${img.height * props.scale}px`
-}
-
 // watchers
 
-watch(baseImage, initCanvas)
-watch(() => props.scale, scaleCanvas, { deep: true })
+watch([baseImage, canvas], initCanvas)
 </script>
 
 <template>
   <div>
-    <div>
+    <div style="display: flex; flex-direction: row; gap: 8px; align-items: center">
       <button class="button" @click="startTimer" v-if="!timerId">Start</button>
       <button class="button" @click="stopTimer" v-else>Pause</button>
+      <label :for="uuid">
+        <strong>Image Scale</strong>
+      </label>
+      <input :id="uuid" type="range" min="0.1" max="10" step="0.1" v-model="scale" />
+      <span>{{ scale }}x</span>
     </div>
-    <div>
+    <div v-if="baseImage">
       <canvas
         ref="canvas"
+        :style="{
+          width: baseImage.naturalWidth * scale + 'px',
+          height: baseImage.naturalHeight * scale + 'px',
+        }"
         @mousedown="onMouseDown"
         @mouseup="onMouseUp"
         @contextmenu.prevent
